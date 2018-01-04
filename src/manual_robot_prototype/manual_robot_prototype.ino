@@ -37,7 +37,8 @@
 #define rumble      false
 
 Servo myservo;  // create servo object to control a servo
-int pos;    // variable to rotate the servo
+int pos;// variable to rotate the servo
+int add;
 
 PS2X ps2x; // create PS2 Controller Class
 
@@ -54,6 +55,7 @@ void setup() {
   Serial.begin(57600);
 
   myservo.attach(SERVO);
+  myservo.write(90);
   
   pinMode(OUT1, OUTPUT);
   pinMode(OUT2, OUTPUT);
@@ -206,19 +208,33 @@ void loop() {
 
     if(ps2x.Button(PSB_SQUARE)) {
         Serial.println("[]");
-        actuatorBackward();
+        servoCatch();
+//        Serial.println(myservo.read(), DEC);
+        
+//        while(ps2x.Button(PSB_SQUARE)) {
+//          if ((myservo.read()-1) >= 0) {
+//            myservo.write(myservo.read()-1);
+//          }
+//        }
+//        delay(15);
     }
 
     if(ps2x.Button(PSB_CROSS)) {
         Serial.println("X");
-        
-        servoRelease();
+        actuatorBackward();
     }
 
     if(ps2x.Button(PSB_CIRCLE)) {
         Serial.println("O");
+        servoRelease();
+//        Serial.println(myservo.read(), DEC);
         
-        servoCatch();
+//        while(ps2x.Button(PSB_CIRCLE)) {
+//          if ((myservo.read()+1) <= 180) {
+//            myservo.write(myservo.read()+1);
+//          }
+//        }
+        
     }
 
     if(ps2x.Button(PSB_L1)) {
@@ -267,29 +283,29 @@ void turnLeft() {
   digitalWrite(OUT1, LOW);
   digitalWrite(OUT2, HIGH);
 
-  digitalWrite(OUT3, HIGH);
-  digitalWrite(OUT4, LOW);
+  digitalWrite(OUT3, LOW);
+  digitalWrite(OUT4, HIGH);
 }
 
 void turnRight() {
   digitalWrite(OUT1, HIGH);
   digitalWrite(OUT2, LOW);
 
-  digitalWrite(OUT3, LOW);
-  digitalWrite(OUT4, HIGH);
+  digitalWrite(OUT3, HIGH);
+  digitalWrite(OUT4, LOW);
 }
 
 void moveForward() {
-  digitalWrite(OUT1, HIGH);
-  digitalWrite(OUT2, LOW);
+  digitalWrite(OUT1, LOW);
+  digitalWrite(OUT2, HIGH);
 
   digitalWrite(OUT3, HIGH);
   digitalWrite(OUT4, LOW);
 }
 
 void moveBackward() {
-  digitalWrite(OUT1, LOW);
-  digitalWrite(OUT2, HIGH);
+  digitalWrite(OUT1, HIGH);
+  digitalWrite(OUT2, LOW);
 
   digitalWrite(OUT3, LOW);
   digitalWrite(OUT4, HIGH);
@@ -319,13 +335,13 @@ void actuatorStop() {
 }
 
 void servoCatch() {
-    pos = 90;
+    pos = 0;
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
     delay(15);                       // waits 15ms for the servo to reach the position
 }
 
 void servoRelease() {
-    pos = 0;
+    pos = 180;
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
     delay(15);                       // waits 15ms for the servo to reach the position
 }
