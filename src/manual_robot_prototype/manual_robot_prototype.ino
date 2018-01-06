@@ -280,16 +280,16 @@ void loop() {
 
 
 void turnLeft() {
-  digitalWrite(OUT1, LOW);
-  digitalWrite(OUT2, HIGH);
+  digitalWrite(OUT1, HIGH);
+  digitalWrite(OUT2, LOW);
 
   digitalWrite(OUT3, LOW);
   digitalWrite(OUT4, HIGH);
 }
 
 void turnRight() {
-  digitalWrite(OUT1, HIGH);
-  digitalWrite(OUT2, LOW);
+  digitalWrite(OUT1, LOW);
+  digitalWrite(OUT2, HIGH);
 
   digitalWrite(OUT3, HIGH);
   digitalWrite(OUT4, LOW);
@@ -299,16 +299,16 @@ void moveForward() {
   digitalWrite(OUT1, LOW);
   digitalWrite(OUT2, HIGH);
 
-  digitalWrite(OUT3, HIGH);
-  digitalWrite(OUT4, LOW);
+  digitalWrite(OUT3, LOW);
+  digitalWrite(OUT4, HIGH);
 }
 
 void moveBackward() {
   digitalWrite(OUT1, HIGH);
   digitalWrite(OUT2, LOW);
 
-  digitalWrite(OUT3, LOW);
-  digitalWrite(OUT4, HIGH);
+  digitalWrite(OUT3, HIGH);
+  digitalWrite(OUT4, LOW);
 }
 
 void moveStop() {
