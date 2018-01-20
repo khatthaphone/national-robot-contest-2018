@@ -4,11 +4,14 @@
 
 #define SERVO 9
 
+// left wheel
 #define OUT1 2
 #define OUT2 3
+#define ENA 6
+
+// right wheel
 #define OUT3 4
 #define OUT4 5
-#define ENA 6
 #define ENB 7
 
 #define ACT_OUT1 22
@@ -68,7 +71,7 @@ void setup() {
   pinMode(ACT_OUT2, OUTPUT);
   pinMode(ACT_ENA, OUTPUT);
 
-  analogWrite(ENA, 255);
+  analogWrite(ENA, 180);
   analogWrite(ENB, 255);
 
   analogWrite(ACT_ENA, 255);
@@ -180,12 +183,17 @@ void loop() {
 
     if(ps2x.Button(PSB_PAD_UP)) {
         Serial.println("UP");
+        
+        analogWrite(ENA, 220);
+        analogWrite(ENB, 255);
+        
         moveForward();
     }
     
     if(ps2x.Button(PSB_PAD_DOWN)) {
         Serial.println("DOWN");
-        
+        analogWrite(ENA, 230);
+        analogWrite(ENB, 255);
         moveBackward();
     }
 
@@ -203,7 +211,7 @@ void loop() {
 
     if(ps2x.Button(PSB_TRIANGLE)) {
         Serial.println("/_\\");
-        actuatorForward();
+        actuatorBackward();
     }
 
     if(ps2x.Button(PSB_SQUARE)) {
@@ -221,7 +229,7 @@ void loop() {
 
     if(ps2x.Button(PSB_CROSS)) {
         Serial.println("X");
-        actuatorBackward();
+        actuatorForward();
     }
 
     if(ps2x.Button(PSB_CIRCLE)) {
