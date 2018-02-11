@@ -95,7 +95,7 @@ void loop() {
       forward(0, 0);
       
       // replace with wait for infared sonsor
-        delay(1000);
+        delay(2000);
         
       forward(pwm_l, pwm_r);
       delay(200);
@@ -110,7 +110,7 @@ void loop() {
       }
       // count == count to go for ccolor
       if (count == goCheckpointCount(color)) {
-        delay(500);
+        delay(250);
         count = 0;
         state = DROP_IN;
       }
@@ -118,39 +118,40 @@ void loop() {
       
     case DROP_IN:
       forward(0, 0);
+      delay(2000);
+//
+//      // turn left to drop
+//      uturnLeftZone(pwmUturn_l, pwmUturn_r);
+//      delay(200);
+//
+//      // stop when turn succeed
+//      if (dropInTurnSucceed())
+//      {
+      forward(pwm_l, pwm_r);
       delay(200);
-
-      // turn left to drop
-      uturnLeftZone(pwmUturn_l, pwmUturn_r);
-      delay(200);
-
-      // stop when turn succeed
-      if (dropInTurnSucceed())
-      {
         state = DROP_OUT;
-      }
-      
+//      }
+//      
       break;
       
     case DROP_OUT:
-      forward(0, 0);
-      delay(200);
-
-      // turn right to get out
-      uturnRightZone(pwmUturn_l, pwmUturn_r);
-      delay(200);
-      
-      // stop when turn succeed
-      if (!dropInTurnSucceed())
-      {
-        forward(pwm_l, pwm_r);
-        delay(200);
+//      forward(0, 0);
+//      delay(200);
+//
+//      // turn right to get out
+//      uturnRightZone(pwmUturn_l, pwmUturn_r);
+//      delay(200);
+//      
+//      // stop when turn succeed
+//      if (!dropInTurnSucceed())
+//      {
+//        forward(pwm_l, pwm_r);
+//        delay(200);
         state = BACK;
-      }
+//      }
       break;
       
     case BACK:
-
       controlFollowLine(); //FollowLine
       if (detectCheckpoint()) {
         delay(100);
