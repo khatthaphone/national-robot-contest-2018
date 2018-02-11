@@ -151,7 +151,7 @@ void loop() {
 //      }
       break;
       
-    case BACK:
+    case BACK: 
       controlFollowLine(); //FollowLine
       if (detectCheckpoint()) {
         delay(100);
