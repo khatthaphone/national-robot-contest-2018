@@ -1,11 +1,12 @@
 
+
 **Code ຂອງຫຸ່ນຍົນສຳລັບເຂົ້າແຂ່ງຂັນຫຸ່ນຍົນ ປະຈຳປີ 2018**
 
 ---
 
-## ໄຟລ໌ຫຼັກໆທີ່ໄດ້ໃຊ້
-*[src/manual/manual.ino](https://bitbucket.org/khatthaphone/national-robot-contest-2018/src/93f1dfb594c255ac7eca475ac2e5afba94b014a6/src/manual/manual.ino?at=master&fileviewer=file-view-default)
-*[src/auto/auto.ino](https://bitbucket.org/khatthaphone/national-robot-contest-2018/src/93f1dfb594c255ac7eca475ac2e5afba94b014a6/src/auto/auto.ino?at=master&fileviewer=file-view-default)
+## ໄຟລ໌ຫຼັກໆທີ່ໄດ້ໃຊ້ປະຈຳ
+* Code ສຳລັບຫຸ່ນ Manual: [src/manual/manual.ino](https://bitbucket.org/khatthaphone/national-robot-contest-2018/src/93f1dfb594c255ac7eca475ac2e5afba94b014a6/src/manual/manual.ino?at=master&fileviewer=file-view-default)
+* Code ສຳລັບຫຸ່ນ Auto: [src/auto/auto.ino](https://bitbucket.org/khatthaphone/national-robot-contest-2018/src/93f1dfb594c255ac7eca475ac2e5afba94b014a6/src/auto/auto.ino?at=master&fileviewer=file-view-default)
 
 ---
 

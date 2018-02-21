@@ -28,8 +28,8 @@ int data_sensor_7 = 0;
 #define PWM2 9
 
 // in line speed 
-int pwm_l = 90;
-int pwm_r = 90;
+int pwm_l = 100;
+int pwm_r = 10 0;
 
 // turn in line speed 
 int pwmTurn_l = 45;
@@ -53,7 +53,7 @@ int pwmUturn_r = 60;
 #define BLUE 2
 
 // initial state
-int state = GO;
+int state = START;
 // initla box color
 int color = GREEN;
 // initial count for checkpoint count
@@ -67,14 +67,14 @@ int count = 0;
 #define SLDR 5
 
 // Switch
-#define SLDR_SW_TOP 52
-#define SLDR_SW_BTM 51
+#define SLDR_SW_TOP 48
+#define SLDR_SW_BTM 46
 
 // Color Sensor
-#define COLOR_S0 47
-#define COLOR_S1 48
-#define COLOR_S2 49
-#define COLOR_S3 50
+#define COLOR_S0 49
+#define COLOR_S1 50
+#define COLOR_S2 51
+#define COLOR_S3 52
 #define COLOR_SENSOR 53
 
 void setup() {
@@ -118,7 +118,9 @@ void setup() {
 
 void loop() {
   Serial.print("state = ");
-  Serial.println(state);
+  Serial.print(state);
+  Serial.print("   count = ");
+  Serial.println(count);
 
   switch(state) {
     case START:
@@ -137,9 +139,13 @@ void loop() {
 //        delay(100);
 //      }
 
+      forward(0, 0);
+      
       do {
         delay(100);
       } while (digitalRead(BOX_IR));
+
+      delay(10000);
 
       forward(pwm_l, pwm_r);
       delay(300);
@@ -162,8 +168,7 @@ void loop() {
         ++count;
       }
       // count == counts to go for color
-      if (count == goCheckpointCount(GREEN)) {
-//        delay(250);
+      if (count == goCheckpointCount(color)) {
         count = 0;
         state = DROP_IN;
       }
@@ -174,33 +179,46 @@ void loop() {
       
       // Drop the box(es)
       while (digitalRead(SLDR_SW_TOP)) {
-        analogWrite(PWM_SLDR, 120);
+        analogWrite(PWM_SLDR, 200);
         digitalWrite(SLDR, HIGH);
-        delay(100);
       }
 
       analogWrite(PWM_SLDR, 0);
-
-      state = DROP_OUT;
+      
+      if (!digitalRead(SLDR_SW_TOP)) {
+        delay(1000);
+        forward(pwm_l, pwm_r);
+        delay(300);
+        state = DROP_OUT;
+      }
       
       break;
 
     case DROP_OUT:
-
+      
       while (digitalRead(SLDR_SW_BTM)) {
-        analogWrite(PWM_SLDR, 120);
+        
+        controlFollowLine(); //FollowLine
+  
+        if (detectCheckpoint()) {
+          delay(100);
+          ++count;
+        }
+        
+        Serial.print("state = ");
+        Serial.print(state);
+        Serial.print("   count = ");
+        Serial.println(count);
+        
+        analogWrite(PWM_SLDR, 200);
         digitalWrite(SLDR, LOW);
-        delay(100);
-        controlFollowLine();
       }
 
       analogWrite(PWM_SLDR, 0);
-//
-//      forward(pwm_l, pwm_r);
-//      delay(300);
       
-      state = BACK;
-
+      if (!digitalRead(SLDR_SW_BTM)) {
+        state = BACK;
+      }
       break;
       
     case BACK:
@@ -210,6 +228,7 @@ void loop() {
         ++count;
       }
       if (count == backCheckpointCount(color)) {
+        forward(0, 0);
         state = WAIT;
         color = changeToNextColor(color);
         count = 0;
