@@ -1,5 +1,9 @@
 //CEIT_Robot_2018 In Loas
 
+// in line speed 
+int pwm_l = 100;
+int pwm_r = 100;
+
 int count_sensor = 0;// Count Line 
 int last_state_sensor = 0; //Check State before Count Line
     
@@ -27,10 +31,6 @@ int data_sensor_7 = 0;
 #define PWM1 11
 #define PWM2 9
 
-// in line speed 
-int pwm_l = 100;
-int pwm_r = 10 0;
-
 // turn in line speed 
 int pwmTurn_l = 45;
 int pwmTurn_r = 45;
@@ -44,8 +44,7 @@ int pwmUturn_r = 60;
 #define WAIT 1
 #define GO 2
 #define DROP_IN 3
-#define DROP_OUT 4
-#define BACK 5
+#define BACK 4
 
 // colors
 #define GREEN 1
@@ -55,7 +54,7 @@ int pwmUturn_r = 60;
 // initial state
 int state = START;
 // initla box color
-int color = GREEN;
+int color = -1;
 // initial count for checkpoint count
 int count = 0;
 
@@ -70,15 +69,13 @@ int count = 0;
 #define SLDR_SW_TOP 48
 #define SLDR_SW_BTM 46
 
-// Color Sensor
-#define COLOR_S0 49
-#define COLOR_S1 50
-#define COLOR_S2 51
-#define COLOR_S3 52
-#define COLOR_SENSOR 53
+// Start Color Swtiches
+#define RED_SWITCH 49
+#define BLUE_SWITCH 51
+bool using_plan_b = false;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   //line direction sensor
   pinMode(SENSOR_T1, INPUT);
   pinMode(SENSOR_T2, INPUT);
@@ -102,18 +99,10 @@ void setup() {
   pinMode(SLDR_SW_TOP, INPUT);
   pinMode(SLDR_SW_BTM, INPUT);
 
-  // Color Sensors
-  pinMode(COLOR_S0, OUTPUT);
-  pinMode(COLOR_S1, OUTPUT);
-  pinMode(COLOR_S2, OUTPUT);
-  pinMode(COLOR_S3, OUTPUT);
-  pinMode(COLOR_SENSOR, INPUT);
-  // Setting Color Sensor frequency scaling to 20%
-  digitalWrite(COLOR_S0,HIGH);
-  digitalWrite(COLOR_S1,LOW);
-
+  // Starting color switches
+  pinMode(BLUE_SWITCH, INPUT);
+  pinMode(RED_SWITCH, INPUT);
   
-
 } //Ending setup fucntion
 
 void loop() {
@@ -124,8 +113,34 @@ void loop() {
 
   switch(state) {
     case START:
+
+      forward(0, 0);
+
+      if (color == -1)
+      {
+        delay(1000);
+        if (digitalRead(BLUE_SWITCH))
+        {
+          color = BLUE;
+          using_plan_b = true;
+        }
+        else if (digitalRead(RED_SWITCH))
+        {
+          color = RED;
+          using_plan_b = true;
+        }
+        else {
+          color = GREEN;
+        }
+  
+        delay(1000);
+      }
+      
+      // wait for plab B (use switches to specify starting box color
+    
       controlFollowLine(); //FollowLine
-      if (detectCheckpoint()) {
+      if (detectCheckpoint())
+      {
         forward(0, 0);
         delay(1000);
         state = WAIT;
@@ -133,19 +148,15 @@ void loop() {
       break;
       
     case WAIT:
-      // replace with wait for infared sonsor
-//      while (!hasBox()) {
-//        forward(0, 0);
-//        delay(100);
-//      }
 
       forward(0, 0);
-      
+
+      // wait for the first box
       do {
         delay(100);
       } while (digitalRead(BOX_IR));
-
-      delay(10000);
+      // wait for the second box
+      delay(12000);
 
       forward(pwm_l, pwm_r);
       delay(300);
@@ -186,42 +197,38 @@ void loop() {
       analogWrite(PWM_SLDR, 0);
       
       if (!digitalRead(SLDR_SW_TOP)) {
+        analogWrite(PWM_SLDR, 0);
         delay(1000);
         forward(pwm_l, pwm_r);
         delay(300);
-        state = DROP_OUT;
+        state = BACK;
       }
       
       break;
-
-    case DROP_OUT:
       
+    case BACK:
+
       while (digitalRead(SLDR_SW_BTM)) {
-        
         controlFollowLine(); //FollowLine
-  
         if (detectCheckpoint()) {
           delay(100);
           ++count;
         }
         
-        Serial.print("state = ");
-        Serial.print(state);
-        Serial.print("   count = ");
-        Serial.println(count);
-        
         analogWrite(PWM_SLDR, 200);
         digitalWrite(SLDR, LOW);
-      }
 
-      analogWrite(PWM_SLDR, 0);
-      
-      if (!digitalRead(SLDR_SW_BTM)) {
-        state = BACK;
+        if (count == backCheckpointCount(color)) {
+          forward(0, 0);
+          analogWrite(PWM_SLDR, 0);
+          state = WAIT;
+          color = changeToNextColor(color);
+          count = 0;
+          break;
+        }
       }
-      break;
-      
-    case BACK:
+      analogWrite(PWM_SLDR, 0);
+
       controlFollowLine(); //FollowLine
       if (detectCheckpoint()) {
         delay(100);
@@ -229,8 +236,9 @@ void loop() {
       }
       if (count == backCheckpointCount(color)) {
         forward(0, 0);
-        state = WAIT;
+        analogWrite(PWM_SLDR, 0);
         color = changeToNextColor(color);
+        state = WAIT;
         count = 0;
       }
 
@@ -240,22 +248,21 @@ void loop() {
 //    controlFollowLine(); //FollowLine
 //    control_Sensor(); //Read Data From Sensor
     
-//  Serial.print("SENSOR_T1 : ");
-//  Serial.println(data_sensor_1);
-//  Serial.print("SENSOR_T2 : ");
-//  Serial.println(data_sensor_2);
-//  Serial.print("SENSOR_T3 : ");
-//  Serial.println(data_sensor_3);
-//  Serial.print("SENSOR_T4 : ");
-//  Serial.println(data_sensor_4);
-//  Serial.print("SENSOR_T5 : ");
-//  Serial.println(data_sensor_5);
-//  Serial.print("SENSOR_T6 : ");
-//  Serial.println((!data_sensor_6));
-//  Serial.print("SENSOR_T7 : ");
-//  Serial.println(data_sensor_7);
-//  Serial.println("-------------");
-//  delay(500);
+  Serial.print("SENSOR_T1 : ");
+  Serial.println(data_sensor_1);
+  Serial.print("SENSOR_T2 : ");
+  Serial.println(data_sensor_2);
+  Serial.print("SENSOR_T3 : ");
+  Serial.println(data_sensor_3);
+  Serial.print("SENSOR_T4 : ");
+  Serial.println(data_sensor_4);
+  Serial.print("SENSOR_T5 : ");
+  Serial.println(data_sensor_5);
+  Serial.print("SENSOR_T6 : ");
+  Serial.println((!data_sensor_6));
+  Serial.print("SENSOR_T7 : ");
+  Serial.println(data_sensor_7);
+  Serial.println("-------------");
 
 } //End_Loop
 
@@ -487,35 +494,9 @@ int backCheckpointCount(int color) {
 int changeToNextColor(int color) {
     switch(color) {
     case GREEN: return RED;
-    case RED: return BLUE;
-    case BLUE: return GREEN;
+    case RED:   return BLUE;
+    case BLUE:  return GREEN;
   }
-}
-
-bool hasBox() {
-
-  do {
-    delay(100);
-  } while (digitalRead(BOX_IR));
-  
-//  bool hasBox = false;
-//  int hb_count;
-//  int i;
-//  for (i = 0; i < 3; i++) {
-//    if (hasBox == !digitalRead(BOX_IR)) {
-//      hb_count++;
-//    } else {
-//      hb_count = 0;
-//      hasBox = !digitalRead(BOX_IR);
-//    }
-//    delay(75);
-//  }
-//
-//  if (hb_count >= 3) {
-//    return true;
-//  }
-//
-//  return false;
 }
 
 bool sliderOnTop() {
@@ -529,7 +510,7 @@ bool sliderOnTop() {
     } else {
       onTop = !digitalRead(SLDR_SW_TOP);
     }
-    delay(75);
+    delay(15);
   }
 
   if (count >= 3) {
@@ -551,7 +532,7 @@ bool sliderOnBottom() {
     } else {
       onBottom = !digitalRead(SLDR_SW_TOP);
     }
-    delay(75);
+    delay(15);
   }
 
   if (count >= 3) {
@@ -561,106 +542,3 @@ bool sliderOnBottom() {
   return false;
 
 }
-
-int getBoxColor() {
-  // Stores frequency read by the photodiodes
-  int redFrequency = 0;
-  int greenFrequency = 0;
-  int blueFrequency = 0;
-
-  // Stores the red. green and blue colors
-  int redColor = 0;
-  int greenColor = 0;
-  int blueColor = 0;
-
-  int color = GREEN;
-  int color_count = 0;
-
-  int i;
-  for(i = 0; i < 5; i++) {
-    // Setting RED (R) filtered photodiodes to be read
-    digitalWrite(COLOR_S2,LOW);
-    digitalWrite(COLOR_S3,LOW);
-    
-    // Reading the output frequency
-    redFrequency = pulseIn(COLOR_SENSOR, LOW);
-    // Remaping the value of the RED (R) frequency from 0 to 255
-    // You must replace with your own values. Here's an example: 
-    redColor = map(redFrequency, 70, 120, 255,0);
-    //  redColor = map(redFrequency, XX, XX, 255,0);
-    
-    // Printing the RED (R) value
-    // Serial.print("R = ");
-    // Serial.print(redColor);
-    delay(100);
-    
-    // Setting GREEN (G) filtered photodiodes to be read
-    digitalWrite(COLOR_S2,HIGH);
-    digitalWrite(COLOR_S3,HIGH);
-    
-    // Reading the output frequency
-    greenFrequency = pulseIn(COLOR_SENSOR, LOW);
-    // Remaping the value of the GREEN (G) frequency from 0 to 255
-    // You must replace with your own values. Here's an example: 
-    greenColor = map(greenFrequency, 100, 199, 255, 0);
-  //  greenColor = map(greenFrequency, XX, XX, 255, 0);
-    
-    // Printing the GREEN (G) value  
-    // Serial.print(" G = ");
-    // Serial.print(greenColor);
-    // Serial.print(greenFrequency);
-    delay(100);
-  
-    // Setting BLUE (B) filtered photodiodes to be read
-    digitalWrite(COLOR_S2,LOW);
-    digitalWrite(COLOR_S3,HIGH);
-    
-    // Reading the output frequency
-    blueFrequency = pulseIn(COLOR_SENSOR, LOW);
-    // Remaping the value of the BLUE (B) frequency from 0 to 255
-    // You must replace with your own values. Here's an example: 
-    blueColor = map(blueFrequency, 38, 180, 255, 0);
-  //  blueColor = map(blueFrequency, XX, XX, 255, 0);
-    
-    // Printing the BLUE (B) value 
-    // Serial.print(" B = ");
-    // Serial.print(blueColor);
-    delay(100);
-
-    // Checks the current detected color and prints
-    // a message in the serial monitor
-    if(redColor > greenColor && redColor > blueColor){
-      // Serial.println(" - RED detected!");
-      if (color == RED) {
-        color_count++;
-      } else {
-        color_count = 0;
-        color = RED;
-      }
-    }else if(greenColor > redColor && greenColor > blueColor){
-      // Serial.println(" - GREEN detected!");
-      if (color == GREEN) {
-        color_count++;
-      } else {
-        color_count = 0;
-        color = GREEN;
-      }
-    }
-    else if(blueColor > redColor && blueColor > greenColor){
-      // Serial.println(" - BLUE detected!");
-      if (color == BLUE) {
-        color_count++;
-      } else {
-        color_count = 0;
-        color = BLUE;
-      }
-    }
-  }
-
-  if (color_count >= 3) {
-    return color;
-  } else {
-    return -1;
-  }
-}
-
