@@ -1,8 +1,8 @@
 //CEIT_Robot_2018 In Loas
 
 // in line speed 
-int pwm_l = 100;
-int pwm_r = 100;
+int pwm_l = 110;
+int pwm_r = 110;
 
 int count_sensor = 0;// Count Line 
 int last_state_sensor = 0; //Check State before Count Line
@@ -46,10 +46,14 @@ int pwmUturn_r = 60;
 #define DROP_IN 3
 #define BACK 4
 
+char state_name[] = {'S', 'W', 'G', 'D', 'B'};
+
 // colors
 #define GREEN 1
 #define RED 0
 #define BLUE 2
+
+char color_name[] = {'R', 'G', 'B'};
 
 // initial state
 int state = START;
@@ -107,7 +111,9 @@ void setup() {
 
 void loop() {
   Serial.print("state = ");
-  Serial.print(state);
+  Serial.print(state_name[state]);
+  Serial.print("   color = ");
+  Serial.print(color_name[color]);
   Serial.print("   count = ");
   Serial.println(count);
 
@@ -178,6 +184,17 @@ void loop() {
         delay(100);
         ++count;
       }
+
+      // start pushing slider from RED if color is GREEN
+      // &
+      // start pushing slider from GREEN if color is BLUE
+      if ((color == GREEN && count == 1) || (color == BLUE && count == 2))
+      {
+        // Push slider up
+        analogWrite(PWM_SLDR, 200);
+        digitalWrite(SLDR, HIGH);
+      }
+      
       // count == counts to go for color
       if (count == goCheckpointCount(color)) {
         count = 0;
@@ -190,6 +207,7 @@ void loop() {
       
       // Drop the box(es)
       while (digitalRead(SLDR_SW_TOP)) {
+        // Push slider up
         analogWrite(PWM_SLDR, 200);
         digitalWrite(SLDR, HIGH);
       }
@@ -197,7 +215,12 @@ void loop() {
       analogWrite(PWM_SLDR, 0);
       
       if (!digitalRead(SLDR_SW_TOP)) {
-        analogWrite(PWM_SLDR, 0);
+        // Pull slider down
+        analogWrite(PWM_SLDR, 200);
+        digitalWrite(SLDR, LOW);
+        
+        delay(500);
+
         delay(1000);
         forward(pwm_l, pwm_r);
         delay(300);
@@ -214,7 +237,8 @@ void loop() {
           delay(100);
           ++count;
         }
-        
+
+        // Pull slider down
         analogWrite(PWM_SLDR, 200);
         digitalWrite(SLDR, LOW);
 
@@ -284,124 +308,162 @@ void controlFollowLine()
 {
       control_Sensor();
       
+      // --234--
       // always moving
       if ((!data_sensor_6 == 0) && (data_sensor_1 == 0) && (data_sensor_2 == 1) && (data_sensor_3 == 1) && (data_sensor_4 == 1)&& (data_sensor_5 == 0) && (data_sensor_7 == 0))
       { 
               forward(pwm_l, pwm_r);
       }
+      // --2345-
       else if ((!data_sensor_6 == 0) && (data_sensor_1 == 1) && (data_sensor_2 == 1) && (data_sensor_3 == 1) && (data_sensor_4 == 1)&& (data_sensor_5 == 1) && (data_sensor_7 == 0))
       {
               forward(pwm_l, pwm_r);
       }
+      // 6-234-7
       else if ((!data_sensor_6 == 1) && (data_sensor_1 == 0) && (data_sensor_2 == 1) && (data_sensor_3 == 1) && (data_sensor_4 == 1)&& (data_sensor_5 == 0) && (data_sensor_7 == 1))
       {
               forward(pwm_l, pwm_r);
       }
+      // 6--34-71
       else if ((!data_sensor_6 == 1) && (data_sensor_1 == 0) && (data_sensor_2 == 0) && (data_sensor_3 == 1) && (data_sensor_4 == 1)&& (data_sensor_5 == 0) && (data_sensor_7 == 1))
       {
               forward(pwm_l, pwm_r);
       }
+      // 6-23--7
       else if ((!data_sensor_6 == 1) && (data_sensor_1 == 0) && (data_sensor_2 == 1) && (data_sensor_3 == 1) && (data_sensor_4 == 0)&& (data_sensor_5 == 0) && (data_sensor_7 == 1))
       {
               forward(pwm_l, pwm_r);
       }
+      // 6--3--7
       else if ((!data_sensor_6 == 1) && (data_sensor_1 == 0) && (data_sensor_2 == 0) && (data_sensor_3 == 1) && (data_sensor_4 == 0)&& (data_sensor_5 == 0) && (data_sensor_7 == 1))
       {
               forward(pwm_l, pwm_r);
       }
+      // --234-7
       else if  ((!data_sensor_6 == 0) && (data_sensor_1 == 0) && (data_sensor_2 == 1) && (data_sensor_3 == 1) && (data_sensor_4 == 1)&& (data_sensor_5 == 0) && (data_sensor_7 == 1))
       { 
               forward(pwm_l, pwm_r);
       }
+      // ---34-7
       else if  ((!data_sensor_6 == 0) && (data_sensor_1 == 0) && (data_sensor_2 == 0) && (data_sensor_3 == 1) && (data_sensor_4 == 1)&& (data_sensor_5 == 0) && (data_sensor_7 == 1))
       { 
               forward(pwm_l, pwm_r);
       }
+      // ---3457
+      else if ((!data_sensor_6 == 0) && (data_sensor_1 == 0) && (data_sensor_2 == 0) && (data_sensor_3 == 1) && (data_sensor_4 == 1)&& (data_sensor_5 == 1) && (data_sensor_7 == 1))
+      {
+              forward(pwm_l, pwm_r);
+      }
+      // --23457
+      else if ((!data_sensor_6 == 0) && (data_sensor_1 == 0) && (data_sensor_2 == 1) && (data_sensor_3 == 1) && (data_sensor_4 == 1)&& (data_sensor_5 == 1) && (data_sensor_7 == 1))
+      {
+              forward(pwm_l, pwm_r);
+      }
+      // 6----57
+      else if ((!data_sensor_6 == 1) && (data_sensor_1 == 0) && (data_sensor_2 == 0) && (data_sensor_3 == 0) && (data_sensor_4 == 0)&& ( data_sensor_5 == 1) && (data_sensor_7 == 1))
+      {
+              forward(pwm_l, pwm_r);
+      }
+      // ---34--
       // turn right in line 
       else if ((!data_sensor_6 == 0) && (data_sensor_1 == 0) && (data_sensor_2 == 0) && (data_sensor_3 == 1) && (data_sensor_4 == 1)&& (data_sensor_5 == 0) && (data_sensor_7 == 0))
       {
         uturnRightZone(pwmTurn_l, pwmTurn_r);
       }
+      // --23---
       // turn left in line 
       else if ((!data_sensor_6 == 0) && (data_sensor_1 == 0) && (data_sensor_2 == 1) && (data_sensor_3 == 1) && (data_sensor_4 == 0)&& (data_sensor_5 == 0) && (data_sensor_7 == 0))
       {
         uturnLeftZone(pwmTurn_l, pwmTurn_r);
       }
+      // --2345-
       // turn right at the uturn zone
       else if ((!data_sensor_6 == 0) && (data_sensor_1 == 0) && (data_sensor_2 == 1) && (data_sensor_3 == 1) && (data_sensor_4 == 1)&& (data_sensor_5 == 1) && (data_sensor_7 == 0))
       {
         uturnRightZone(pwmUturn_l - 5, pwmUturn_r - 5);
       }
+      // ---345-
       else if ((!data_sensor_6 == 0) && (data_sensor_1 == 0) && (data_sensor_2 == 0) && (data_sensor_3 == 1) && (data_sensor_4 == 1)&& (data_sensor_5 == 1) && (data_sensor_7 == 0))
       {
         uturnRightZone(pwmUturn_l, pwmUturn_r);
         delay(5);
       }
+      // ----45-
       else if ((!data_sensor_6 == 0) && (data_sensor_1 == 0) && (data_sensor_2 == 0) && (data_sensor_3 == 0) && (data_sensor_4 == 1)&& (data_sensor_5 == 1) && (data_sensor_7 == 0))
       {
         uturnRightZone(pwmUturn_l, pwmUturn_r);
         delay(10);
       }
+      // ----457
       else if ((!data_sensor_6 == 0) && (data_sensor_1 == 0) && (data_sensor_2 == 0) && (data_sensor_3 == 0) && (data_sensor_4 == 1)&& (data_sensor_5 == 1) && (data_sensor_7 == 1))
       {
         uturnRightZone(pwmUturn_l - 5, pwmUturn_r - 5);
         delay(20);
       }
+      // -----5-
       else if ((!data_sensor_6 == 0) && (data_sensor_1 == 0) && (data_sensor_2 == 0) && (data_sensor_3 == 0) && (data_sensor_4 == 0)&& (data_sensor_5 == 1) && (data_sensor_7 == 0))
       {
         uturnRightZone(pwmUturn_l, pwmUturn_r);
         delay(18);
       }
+      // -----57
       else if ((!data_sensor_6 == 0) && (data_sensor_1 == 0) && (data_sensor_2 == 0) && (data_sensor_3 == 0) && (data_sensor_4 == 0)&& (data_sensor_5 == 1) && (data_sensor_7 == 1))
       {
         uturnRightZone(pwmUturn_l + 13, pwmUturn_r + 25);
         delay(35); 
       }
+      // ------7
       else if ((!data_sensor_6 == 0) && (data_sensor_1 == 0) && (data_sensor_2 == 0) && (data_sensor_3 == 0) && (data_sensor_4 == 0)&& (data_sensor_5 == 0) && (data_sensor_7 == 1))
       {
         uturnRightZone(pwmUturn_l + 15, pwmUturn_r + 5);
         delay(40);
       }
+      // -1234--
       //turn left at the uturn zone
        else if ((!data_sensor_6 == 0) && (data_sensor_1 == 1) && (data_sensor_2 == 1) && (data_sensor_3 == 1) && (data_sensor_4 == 1)&& (data_sensor_5 == 0) && (data_sensor_7 == 0))
       {
         uturnLeftZone(pwmUturn_l - 5, pwmUturn_r - 5);
       }
+      // -123---
       else if ((!data_sensor_6 == 0) && (data_sensor_1 == 1) && (data_sensor_2 == 1) && (data_sensor_3 == 1) && (data_sensor_4 == 0)&& (data_sensor_5 == 0) && (data_sensor_7 == 0))
       {
         uturnLeftZone(pwmUturn_l - 5, pwmUturn_r - 5);
         delay(5);
       }
+      // -12----
       else if ((!data_sensor_6 == 0) && (data_sensor_1 == 1) && (data_sensor_2 == 1) && (data_sensor_3 == 0) && (data_sensor_4 == 0)&& (data_sensor_5 == 0) && (data_sensor_7 == 0))
       {
         uturnLeftZone(pwmUturn_l, pwmUturn_r);
         delay(10);
       }
+      // 612----
       else if ((!data_sensor_6 == 1) && (data_sensor_1 == 1) && (data_sensor_2 == 1) && (data_sensor_3 == 0) && (data_sensor_4 == 0)&& (data_sensor_5 == 0) && (data_sensor_7 == 0))
       {
         uturnLeftZone(pwmUturn_l, pwmUturn_r);
         delay(20);
       }
+      // -1-----
       else if ((!data_sensor_6 == 0) && (data_sensor_1 == 1) && (data_sensor_2 == 0) && (data_sensor_3 == 0) && (data_sensor_4 == 0)&& (data_sensor_5 == 0) && (data_sensor_7 == 0))
       {
         uturnLeftZone(pwmUturn_l, pwmUturn_r);
         delay(18);
       }
+      // 61-----
       else if ((!data_sensor_6 == 1) && (data_sensor_1 == 1) && (data_sensor_2 == 0) && (data_sensor_3 == 0) && (data_sensor_4 == 0)&& (data_sensor_5 == 0) && (data_sensor_7 == 0))
       {
         uturnLeftZone(pwmUturn_l + 25, pwmUturn_r + 13);
         delay(35);
       }
+      // 6------
       else if ((!data_sensor_6 == 1) && (data_sensor_1 == 0) && (data_sensor_2 == 0) && (data_sensor_3 == 0) && (data_sensor_4 == 0)&& (data_sensor_5 == 0) && (data_sensor_7 == 0))
       {
         uturnLeftZone(pwmUturn_l + 5, pwmUturn_r + 15);
         delay(40);
-      } 
+      }
       else 
       {
         forward(0, 0);
       }
-      //delay(100);
 } //end control follow line
 
 

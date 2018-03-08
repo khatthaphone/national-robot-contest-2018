@@ -14,6 +14,13 @@
 #define OUT4 5
 #define ENB 7
 
+// Wheel relay left
+#define LEFT_A 2
+#define LEFT_B 3
+// Wheel relay right
+#define RIGHT_A 4
+#define RIGHT_B 5
+
 #define ACT_OUT1 22
 #define ACT_OUT2 24
 #define ACT_ENA 26
@@ -75,6 +82,11 @@ void setup() {
   analogWrite(ENB, 255);
 
   analogWrite(ACT_ENA, 255);
+
+  pinMode(LEFT_A, OUTPUT);
+  pinMode(LEFT_B, OUTPUT);
+  pinMode(RIGHT_A, OUTPUT);
+  pinMode(RIGHT_B, OUTPUT);
   
   delay(300);  //added delay to give wireless ps2 module some time to startup, before configuring it
    
@@ -288,43 +300,65 @@ void loop() {
 
 
 void turnLeft() {
-  digitalWrite(OUT1, HIGH);
-  digitalWrite(OUT2, LOW);
+//  digitalWrite(OUT1, HIGH);
+//  digitalWrite(OUT2, LOW);
+//  digitalWrite(OUT3, LOW);
+//  digitalWrite(OUT4, HIGH);
 
-  digitalWrite(OUT3, LOW);
-  digitalWrite(OUT4, HIGH);
+  digitalWrite(LEFT_A, LOW);
+  digitalWrite(LEFT_B, HIGH);
+  digitalWrite(RIGHT_A, LOW);
+  digitalWrite(RIGHT_B, HIGH);
 }
 
 void turnRight() {
-  digitalWrite(OUT1, LOW);
-  digitalWrite(OUT2, HIGH);
+//  digitalWrite(OUT1, LOW);
+//  digitalWrite(OUT2, HIGH);
+//
+//  digitalWrite(OUT3, HIGH);
+//  digitalWrite(OUT4, LOW);
 
-  digitalWrite(OUT3, HIGH);
-  digitalWrite(OUT4, LOW);
+  digitalWrite(LEFT_A, HIGH);
+  digitalWrite(LEFT_B, LOW);
+  digitalWrite(RIGHT_A, HIGH);
+  digitalWrite(RIGHT_B, LOW);
 }
 
 void moveForward() {
-  digitalWrite(OUT1, LOW);
-  digitalWrite(OUT2, HIGH);
+//  digitalWrite(OUT1, LOW);
+//  digitalWrite(OUT2, HIGH);
+//
+//  digitalWrite(OUT3, LOW);
+//  digitalWrite(OUT4, HIGH);
 
-  digitalWrite(OUT3, LOW);
-  digitalWrite(OUT4, HIGH);
+  digitalWrite(LEFT_A, HIGH);
+  digitalWrite(LEFT_B, LOW);
+  digitalWrite(RIGHT_A, LOW);
+  digitalWrite(RIGHT_B, HIGH);
 }
 
 void moveBackward() {
-  digitalWrite(OUT1, HIGH);
-  digitalWrite(OUT2, LOW);
+//  digitalWrite(OUT1, HIGH);
+//  digitalWrite(OUT2, LOW);
+//  digitalWrite(OUT3, HIGH);
+//  digitalWrite(OUT4, LOW);
 
-  digitalWrite(OUT3, HIGH);
-  digitalWrite(OUT4, LOW);
+  digitalWrite(LEFT_A, LOW);
+  digitalWrite(LEFT_B, HIGH);
+  digitalWrite(RIGHT_A, HIGH);
+  digitalWrite(RIGHT_B, LOW);
 }
 
 void moveStop() {
-  digitalWrite(OUT1, LOW);
-  digitalWrite(OUT2, LOW);
-  
-  digitalWrite(OUT3, LOW);
-  digitalWrite(OUT4, LOW);
+//  digitalWrite(OUT1, LOW);
+//  digitalWrite(OUT2, LOW);
+//  
+//  digitalWrite(OUT3, LOW);
+//  digitalWrite(OUT4, LOW);
+  digitalWrite(LEFT_A, LOW);
+  digitalWrite(LEFT_B, LOW);
+  digitalWrite(RIGHT_A, LOW);
+  digitalWrite(RIGHT_B, LOW);
 }
 
 void actuatorForward() {
