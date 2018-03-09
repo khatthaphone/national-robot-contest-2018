@@ -70,12 +70,12 @@ int count = 0;
 #define SLDR 5
 
 // Switch
-#define SLDR_SW_TOP 48
-#define SLDR_SW_BTM 46
+#define SLDR_SW_TOP 46
+#define SLDR_SW_BTM 48
 
 // Start Color Swtiches
-#define RED_SWITCH 49
-#define BLUE_SWITCH 51
+#define RED_SWITCH 51
+#define BLUE_SWITCH 49
 bool using_plan_b = false;
 
 void setup() {
@@ -124,7 +124,7 @@ void loop() {
 
       if (color == -1)
       {
-        delay(1000);
+        delay(500);
         if (digitalRead(BLUE_SWITCH))
         {
           color = BLUE;
@@ -139,7 +139,7 @@ void loop() {
           color = GREEN;
         }
   
-        delay(1000);
+        delay(500);
       }
       
       // wait for plab B (use switches to specify starting box color
@@ -188,11 +188,14 @@ void loop() {
       // start pushing slider from RED if color is GREEN
       // &
       // start pushing slider from GREEN if color is BLUE
-      if ((color == GREEN && count == 1) || (color == BLUE && count == 2))
+      if (((color == GREEN && count == 1) || (color == BLUE && count == 2)) && digitalRead(SLDR_SW_TOP))
       {
         // Push slider up
         analogWrite(PWM_SLDR, 200);
         digitalWrite(SLDR, HIGH);
+      } else
+      {
+        analogWrite(PWM_SLDR, 0);
       }
       
       // count == counts to go for color
@@ -604,3 +607,4 @@ bool sliderOnBottom() {
   return false;
 
 }
+
